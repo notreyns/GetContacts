@@ -19,8 +19,33 @@ class MainActivity : AppCompatActivity() {
         if (permissionGranted) {
             getContacts()
         } else {
-            Log.d("MainActivity", "Permission denied")
+            requestPermission()
         }
+    }
+
+    private fun requestPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(android.Manifest.permission.READ_CONTACTS),
+            READ_CONTACTS_RC
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+
+        if (requestCode == READ_CONTACTS_RC && grantResults.isNotEmpty()) {
+            val permissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (permissionGranted) {
+                getContacts()
+            } else {
+                Log.d("MainActivity", "Permission denied")
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun getContacts() {
@@ -32,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             null
         )
 
-        while (cursor?.moveToNext() != null) {
+        while (cursor?.moveToNext() == true) {
             val id = cursor.getInt(
                 cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID)
             )
@@ -46,5 +71,10 @@ class MainActivity : AppCompatActivity() {
         cursor?.close()
 
 
+    }
+
+    companion object {
+        //READ_CONTACTS_REQUEST_CODE
+        private const val READ_CONTACTS_RC = 100
     }
 }
